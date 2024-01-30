@@ -1,19 +1,35 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import GithubCorners from "@yukiniro/react-github-corners";
 import "@yukiniro/react-github-corners/dist/style.css";
+import { InputFile } from "@/components/pro-ui/input-file";
+import { useState } from "react";
+import { TrimView } from "@/components/pro-ui/trim-view";
 
 export default function Home() {
-  const [count, setCount] = useState(0);
+  const [videoUrl, setVideoUrl] = useState("");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e?.target?.files) {
+      return;
+    }
+
+    const file = e.target.files[0];
+
+    if (!file) {
+      return;
+    }
+    setVideoUrl(URL.createObjectURL(file));
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen min-w-screen items-center justify-center p-12">
       <GithubCorners href="https://github.com/Yukiniro/next-starter" />
-      <div className="z-10 max-w-5xl w-full font-mono text-lg text-center">
-        <h1>Hello World</h1>
-        <Button onClick={() => setCount(count + 1)}>Click Count: {count}</Button>
-      </div>
+      {videoUrl ? (
+        <TrimView videoUrl={videoUrl} />
+      ) : (
+        <InputFile onChange={handleFileChange} label="Upload Your Video" id="upload-video" />
+      )}
     </main>
   );
 }
