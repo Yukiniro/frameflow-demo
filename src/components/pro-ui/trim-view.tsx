@@ -1,13 +1,16 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { InputNumber } from "./input-number";
 import { Button } from "../ui/button";
+import fflow from "frameflow";
+import { download } from "downloadmejs";
 
 interface TrimViewProps {
   videoUrl: string;
+  videoFile: File | null;
 }
 
 export function TrimView(props: TrimViewProps) {
-  const { videoUrl } = props;
+  const { videoUrl, videoFile } = props;
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const videoStyle = useMemo(() => {
@@ -16,6 +19,14 @@ export function TrimView(props: TrimViewProps) {
       marginTop: "2rem",
     };
   }, []);
+
+  const handleClick = useCallback(async () => {
+    const video = await fflow.source(videoFile as File);
+    const trimVideo = video.trim({ start: startTime, duration: endTime - startTime });
+    const newVideo = fflow.group([trimVideo]);
+    const outBlob = await newVideo.exportTo(Blob, { format: "mp4" });
+    download(outBlob, { name: "trim.mp4" });
+  }, [endTime, startTime, videoFile]);
 
   return (
     <div>
@@ -27,7 +38,7 @@ export function TrimView(props: TrimViewProps) {
           <InputNumber value={endTime} onChange={setEndTime} label="End Time" id="start-time" />
         </div>
         <div className="flex justify-center mt-4">
-          <Button>Trim and Export</Button>
+          <Button onClick={handleClick}>Trim and Export</Button>
         </div>
       </div>
     </div>
